@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - file: "db/schema.sql"
+    migrations:
+      - file: "./migrations"
+    queries:
+      - file: "db/queries.sql"
+    gen:
+      go:
+        out: "./db/sqlc"
+        package: "db"
+        emit_json_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
