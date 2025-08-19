@@ -7,14 +7,70 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getUsers = `-- name: getUsers :many
+const createUser = `-- name: CreateUser :exec
+insert into users (
+    first_name,
+    last_name,
+    password_hash,
+    email,
+    username,
+    dob
+)  VALUES (
+    $1, $2, $3, $4, $5, $6
+)
+RETURNING id, first_name, last_name, password_hash, email, username, dob
+`
+
+type CreateUserParams struct {
+	FirstName    pgtype.Text
+	LastName     pgtype.Text
+	PasswordHash string
+	Email        string
+	Username     pgtype.Text
+	Dob          pgtype.Timestamp
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.FirstName,
+		arg.LastName,
+		arg.PasswordHash,
+		arg.Email,
+		arg.Username,
+		arg.Dob,
+	)
+	return err
+}
+
+const getUserById = `-- name: GetUserById :one
 select id, first_name, last_name, password_hash, email, username, dob from users where id = $1
 `
 
-func (q *Queries) getUsers(ctx context.Context, id int32) ([]User, error) {
-	rows, err := q.db.Query(ctx, getUsers, id)
+func (q *Queries) GetUserById(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRow(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.PasswordHash,
+		&i.Email,
+		&i.Username,
+		&i.Dob,
+	)
+	return i, err
+}
+
+const getUsers = `-- name: getUsers :many
+select id, first_name, last_name, password_hash, email, username, dob from users
+`
+
+func (q *Queries) getUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsers)
 	if err != nil {
 		return nil, err
 	}
