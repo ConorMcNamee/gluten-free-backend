@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: glutenfreepassword
       POSTGRES_DB: glutenfree_db
     ports:
-      - "5432:5435"
+      - "5555:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
