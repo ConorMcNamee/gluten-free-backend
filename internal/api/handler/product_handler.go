@@ -1,11 +1,32 @@
 package handler
 
-import "github.com/labstack/echo/v4"
+import (
+	"gluten/internal/db"
+	"net/http"
 
-type ProductHandler struct{}
+	"github.com/labstack/echo/v4"
+)
+
+type ProductHandler struct {
+	ProductQueries *db.Queries
+}
+
+type GetProductRequest struct {
+	ProductId int32 `json:"product_id"`
+}
 
 func (ph *ProductHandler) GetProductByBarcode(c echo.Context) error {
-	return nil
+	var req GetProductRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+	}
+
+	product, err := ph.ProductQueries.GetAllProductsById(c.Request().Context(), req.ProductId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid JSON"})
+	}
+
+	return c.JSON(http.StatusOK, product)
 }
 
 func (ph *ProductHandler) CreateProduct(c echo.Context) error {

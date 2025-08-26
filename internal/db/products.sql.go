@@ -9,12 +9,12 @@ import (
 	"context"
 )
 
-const getAllProductsById = `-- name: GetAllProductsById :many
-select id, product_name, brand, size, variant, country, certified_gluten_free, date_added from products where id = $1
+const getAllProducts = `-- name: GetAllProducts :many
+select id, product_name, brand, size, variant, country, certified_gluten_free, date_added from products
 `
 
-func (q *Queries) GetAllProductsById(ctx context.Context, id int32) ([]Product, error) {
-	rows, err := q.db.Query(ctx, getAllProductsById, id)
+func (q *Queries) GetAllProducts(ctx context.Context) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getAllProducts)
 	if err != nil {
 		return nil, err
 	}
@@ -40,4 +40,24 @@ func (q *Queries) GetAllProductsById(ctx context.Context, id int32) ([]Product, 
 		return nil, err
 	}
 	return items, nil
+}
+
+const getAllProductsById = `-- name: GetAllProductsById :one
+select id, product_name, brand, size, variant, country, certified_gluten_free, date_added from products where id = $1
+`
+
+func (q *Queries) GetAllProductsById(ctx context.Context, id int32) (Product, error) {
+	row := q.db.QueryRow(ctx, getAllProductsById, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.ProductName,
+		&i.Brand,
+		&i.Size,
+		&i.Variant,
+		&i.Country,
+		&i.CertifiedGlutenFree,
+		&i.DateAdded,
+	)
+	return i, err
 }

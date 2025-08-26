@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"gluten/internal/api"
+	"gluten/internal/db"
 	"log"
 
 	"github.com/jackc/pgx/v5"
@@ -20,9 +21,11 @@ func main() {
 		return
 	}
 
+	queries := db.New(conn)
+
 	defer conn.Close(ctx)
 
-	api.RegisterRoutes(e)
+	api.RegisterRoutes(e, queries)
 
 	log.Fatal(e.Start(":8081"))
 }
