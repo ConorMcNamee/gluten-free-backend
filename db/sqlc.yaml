@@ -1,7 +1,9 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "./sqlc_queries/users.sql"
+    queries: 
+      - "./sqlc_queries/users.sql"
+      - "./sqlc_queries/products.sql"
     schema: "schema.sql"
     gen:
       go:

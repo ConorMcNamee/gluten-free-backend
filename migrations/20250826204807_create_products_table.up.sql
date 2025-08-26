@@ -1,15 +1,3 @@
--- name: Users table
-create table if not exists users(
-    id serial primary key,
-    first_name varchar(255),
-    last_name varchar(255),
-    password_hash varchar(255) not null,
-    email varchar(255) not null,
-    username varchar(255),
-    dob timestamp
-);
-
--- name: Products Table
 create table if not exists products (
     id serial primary key,
     product_name VARCHAR(255) NOT NULL,
@@ -20,7 +8,7 @@ create table if not exists products (
     certified_gluten_free boolean not null default false,
     date_added TIMESTAMP DEFAULT NOW()
 );
--- name: Ingredients
+
 CREATE TABLE IF NOT EXISTS ingredients (
     id SERIAL PRIMARY KEY,
     canonical_name TEXT UNIQUE NOT NULL,  
@@ -28,7 +16,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
     notes TEXT
 );
 
-CREATE TABLE if not exists product_barcodes (
+CREATE TABLE product_barcodes (
     id serial PRIMARY KEY not null,
     product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     barcode VARCHAR(20) UNIQUE NOT NULL,
@@ -44,20 +32,3 @@ CREATE TABLE product_ocr (
     ocr_text TEXT NOT NULL,
     date_added TIMESTAMP DEFAULT NOW()
 );
-
-CREATE TYPE allergen_type AS enum (
-    'gluten',
-    'milk',
-    'eggs',
-    'fish',
-    'crustaceans',
-    'nuts',
-    'peanuts',
-    'soy',
-    'sesame',
-    'celery',
-    'mustard',
-    'sulphites',
-    'molluscs',
-    'lupin'
-)

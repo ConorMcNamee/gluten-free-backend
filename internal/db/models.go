@@ -5,8 +5,100 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type AllergenType string
+
+const (
+	AllergenTypeGluten      AllergenType = "gluten"
+	AllergenTypeMilk        AllergenType = "milk"
+	AllergenTypeEggs        AllergenType = "eggs"
+	AllergenTypeFish        AllergenType = "fish"
+	AllergenTypeCrustaceans AllergenType = "crustaceans"
+	AllergenTypeNuts        AllergenType = "nuts"
+	AllergenTypePeanuts     AllergenType = "peanuts"
+	AllergenTypeSoy         AllergenType = "soy"
+	AllergenTypeSesame      AllergenType = "sesame"
+	AllergenTypeCelery      AllergenType = "celery"
+	AllergenTypeMustard     AllergenType = "mustard"
+	AllergenTypeSulphites   AllergenType = "sulphites"
+	AllergenTypeMolluscs    AllergenType = "molluscs"
+	AllergenTypeLupin       AllergenType = "lupin"
+)
+
+func (e *AllergenType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AllergenType(s)
+	case string:
+		*e = AllergenType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AllergenType: %T", src)
+	}
+	return nil
+}
+
+type NullAllergenType struct {
+	AllergenType AllergenType
+	Valid        bool // Valid is true if AllergenType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAllergenType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AllergenType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AllergenType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAllergenType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AllergenType), nil
+}
+
+type Ingredient struct {
+	ID            int32
+	CanonicalName string
+	Allergen      NullAllergenType
+	Notes         pgtype.Text
+}
+
+type Product struct {
+	ID                  int32
+	ProductName         string
+	Brand               string
+	Size                pgtype.Text
+	Variant             pgtype.Text
+	Country             string
+	CertifiedGlutenFree bool
+	DateAdded           pgtype.Timestamp
+}
+
+type ProductBarcode struct {
+	ID                 int32
+	ProductID          int64
+	Barcode            string
+	ManufacturerPrefix pgtype.Text
+	ProductCode        pgtype.Text
+	CheckDigit         pgtype.Text
+	DateAdded          pgtype.Timestamp
+}
+
+type ProductOcr struct {
+	ID        int64
+	ProductID int64
+	OcrText   string
+	DateAdded pgtype.Timestamp
+}
 
 type User struct {
 	ID           int32
